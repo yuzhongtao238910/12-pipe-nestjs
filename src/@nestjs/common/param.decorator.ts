@@ -2,7 +2,7 @@ import "reflect-metadata"
 
 
 export const createParamDecorator = (keyOrFactory: String  | Function ) => {
-    return function (data?: any) {
+    return function (data?: any, ...pipes: any[]) {
         // 执行的时候是从右到左
         return function (target: Object, propertyKey: string, parameterIndex: number) {
             // 给类的原型的propertyKey 也就是 handleRequest 这个方法上添加元数据
@@ -21,7 +21,8 @@ export const createParamDecorator = (keyOrFactory: String  | Function ) => {
                     parameterIndex,
                     key: "DecoratorFactory",
                     factory: keyOrFactory,
-                    data
+                    data,
+                    pipes
                 }
 
 
@@ -30,7 +31,8 @@ export const createParamDecorator = (keyOrFactory: String  | Function ) => {
                 existingParameters[parameterIndex] = {
                     parameterIndex,
                     key: keyOrFactory,
-                    data
+                    data,
+                    pipes
                 }
             }
 

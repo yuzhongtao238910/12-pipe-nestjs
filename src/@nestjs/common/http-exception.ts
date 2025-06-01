@@ -27,7 +27,7 @@ export class HttpException extends Error {
 
 
 export class BadRequestException extends HttpException {
-    constructor(message, error) {
+    constructor(message, error?) {
         super({
             message, error,
             statusCode: HttpStatus.BAD_REQUEST

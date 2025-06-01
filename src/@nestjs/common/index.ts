@@ -17,3 +17,6 @@ export * from "./http-exception.filter"
 
 export * from "./catch.decorator"
 export * from "./use-filters.decorator"
+
+export * from "./pipes"
+export * from "./pipe-transform.interface"
