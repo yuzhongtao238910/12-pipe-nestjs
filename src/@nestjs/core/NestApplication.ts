@@ -606,7 +606,7 @@ export class NestApplication {
                         // let a;
                         // console.log(a.toString())
 
-                        const args = this.resolveParams(controller, method, methodName, req, res, next, host)
+                        const args = await this.resolveParams(controller, method, methodName, req, res, next, host)
 
                         const result = method.call(controller, ...args)
 
@@ -726,7 +726,7 @@ export class NestApplication {
         return metaData.filter(Boolean).find(item => item.key === 'Res' || item.key === 'Response' || item.key === "Next")
     }
 
-    resolveParams(target: any, method: any, methodName: any, req: ExpressRequest, res: ExpressResponse, next: NextFunction, host: ArgumentsHost) {
+    async resolveParams(target: any, method: any, methodName: any, req: ExpressRequest, res: ExpressResponse, next: NextFunction, host: ArgumentsHost) {
 
         // const existingParameters = Reflect.getMetadata("params", Reflect.getPrototypeOf(target), methodName) || []
 
@@ -739,7 +739,7 @@ export class NestApplication {
         }
         
 
-        return temp.map((item, index) => {
+        return Promise.all(temp.map(async (item, index) => {
             const {key, data, factory, pipes} = item
 
 
@@ -785,13 +785,13 @@ export class NestApplication {
             }
 
 
-            for (const pipe of [...pipes]) {
+            for (const pipe of [...pipes].filter(Boolean)) {
                 const pipeInstance = this.getPipeInstance(pipe)
-                value = pipeInstance.transform(value)
+                value = await pipeInstance.transform(value)
             }
 
             return value;
-        })
+        }))
         // .filter(item => item)
     }
 
