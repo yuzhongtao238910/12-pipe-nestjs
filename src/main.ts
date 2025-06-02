@@ -11,15 +11,15 @@ import { CustomExceptionFilter } from "./exception/self-custom-exception.filter"
 //     }
 // }
 
-class Apple {}
+// class Apple {}
 
-const apple = new Apple()
+// const apple = new Apple()
 
 // console.log(apple instanceof Function) // false
 // console.log(Apple instanceof Function) // true
 
 
-
+// console.log(String === String, String)
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
 

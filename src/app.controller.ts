@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common"
+import { Controller, Get, Query } from "@nestjs/common"
 
 
 
@@ -7,6 +7,16 @@ import { Param } from "@nestjs/common"
 import { ParseIntPipe } from "@nestjs/common"
 import { ParseFloatPipe } from "@nestjs/common"
 import { ParseBoolPipe } from "@nestjs/common"
+import { ParseArrayPipe } from "@nestjs/common"
+import { ParseUUIDPipe } from "@nestjs/common"
+import { ParseEnumPipe } from "@nestjs/common"
+import { DefaultValuePipe } from "@nestjs/common"
+
+enum Roles {
+    Admin = "admin",
+    VIP = "vip"
+}
+
 @Controller('')
 // 可以设置控制器级别的，只针对控制器级别的方法生效
 // @UseFilters( new CustomExceptionFilter() ) // 这个是控制器级别的，针对所有的生效
@@ -46,5 +56,41 @@ export class AppController {
     @Get("bool/:flag")
     getBool(@Param('flag', ParseBoolPipe) flag: boolean) {
         return `The flag is ${flag}`
+    }
+
+
+
+    // http://localhost:8080/array/123,123,345
+    // 默认就是使用逗号分隔，但是可以自定义分隔符号
+    @Get("array/:values")
+    getArray(@Param("values", ParseArrayPipe) values: any[]) {
+    // http://localhost:8080/array/123@123@345
+    // getArray(@Param("values", new ParseArrayPipe({ items: String, separator: "@" })) values: any[]) {
+        console.log(values, 56)
+        // npm i class-transformer
+        // npm i class-validator
+        return `${values.join("-")}`
+    }
+
+    // uuid
+    @Get("uuid/:uuid")
+    getUUID(@Param("uuid", ParseUUIDPipe) uuid: string) {
+        // ParseUUIDPipe 判断传递过来的id是不是uuid
+        return `${uuid} is a uuid`
+    }
+
+    //
+    @Get("enum/:type")
+    getEnumType(@Param("type", new ParseEnumPipe(Roles)) type: string) {
+        // ParseUUIDPipe 判断传递过来的id是不是uuid
+        return `${type} is a uuid`
+    }
+
+
+    // 默认值管道
+    @Get("default")
+    getDefault(@Query("username", new DefaultValuePipe("Guest")) username: string) {
+        // ParseUUIDPipe 判断传递过来的id是不是uuid
+        return `${username} is a default-value`
     }
 }
