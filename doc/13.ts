@@ -21,6 +21,9 @@ const user = new CreateUserDto()
 user.name = "1";
 // user.age = 1
 (user as any).age = '1'
+
+// class-transformer
+// 比如说这个user是客户端传递过来的，所以是需要先通过plainToInstance变成类的实例哈
 validate(user)
     .then(errors => {
         if (errors.length > 0) {
