@@ -5,8 +5,9 @@ import { NestMiddleware, RequestMethod, ArgumentsHost, ExceptionFilter } from "@
 
 import { INJECTED_TOKENS, DESGIN_PARAMTYPES } from "../common/constant"
 import { defineModule } from "../common/module.decorator"
-import { APP_FILTER} from "./constants"
+import { APP_FILTER, DECORATOR_FACTORY} from "./constants"
 import { GlobalHttpExceptionFilter } from "../common/http-exception.filter"
+import { PipeTransform } from "@nestjs/common"
 export class NestApplication {
 
 
@@ -551,6 +552,9 @@ export class NestApplication {
 
             defineModule(this.module, controllerFilters.filter(fil =>fil instanceof Function))
 
+            // 获取控制器上的pipes
+            const controllerPipes = Reflect.getOwnMetadata("pipes", Controller) ?? []            
+
 
             for (const methodName of Object.getOwnPropertyNames(controllerPrototype)) {
                 const method = controllerPrototype[methodName]
@@ -573,6 +577,11 @@ export class NestApplication {
 
                 // 获取方法上绑定的异常过滤器的数组
                 const methodFilters = Reflect.getMetadata("filters", method) ?? []
+
+                // 获取方法上绑定的pipes
+                const methodPipes = Reflect.getMetadata("pipes", method) ?? []
+
+                const pipes = [...controllerPipes, ...methodPipes]
 
                 
 
@@ -606,9 +615,9 @@ export class NestApplication {
                         // let a;
                         // console.log(a.toString())
 
-                        const args = await this.resolveParams(controller, method, methodName, req, res, next, host)
+                        const args = await this.resolveParams(controller, method, methodName, req, res, next, host, pipes)
 
-                        const result = method.call(controller, ...args)
+                        const result = await method.call(controller, ...args)
 
 
                         if (result?.url) {
@@ -645,13 +654,15 @@ export class NestApplication {
                                 res.setHeader(header.name, header.value)
                             })
 
+                            console.log(result, 657)
+
                             // 把返回值序列化发回给客户端
                             res.send(result)
                         }
 
 
-                        let a;
-                        console.log(a.toString())
+                        // let a;
+                        // console.log(a.toString())
 
 
                     } catch(error) {
@@ -674,7 +685,7 @@ export class NestApplication {
 
             const dependencies = this.resolveDependencies(filter)
 
-            console.log(dependencies, 621)
+            // console.log(dependencies, 621)
 
             return new filter(...dependencies)
 
@@ -726,7 +737,7 @@ export class NestApplication {
         return metaData.filter(Boolean).find(item => item.key === 'Res' || item.key === 'Response' || item.key === "Next")
     }
 
-    async resolveParams(target: any, method: any, methodName: any, req: ExpressRequest, res: ExpressResponse, next: NextFunction, host: any) {
+    async resolveParams(target: any, method: any, methodName: any, req: ExpressRequest, res: ExpressResponse, next: NextFunction, host: any, pipes: PipeTransform[]) {
 
         // const existingParameters = Reflect.getMetadata("params", Reflect.getPrototypeOf(target), methodName) || []
 
@@ -737,10 +748,12 @@ export class NestApplication {
         if (existingParameters && existingParameters.length) {
             // temp = existingParameters.sort((a, b) => a.parameterIndex - b.parameterIndex)
         }
+
+        // console.log(temp, 750)
         
 
         return Promise.all(temp.map(async (item, index) => {
-            const {key, data, factory, pipes} = item
+            const {key, data, factory, pipes: paramPipes} = item
 
 
             let value;
@@ -775,7 +788,7 @@ export class NestApplication {
                 case "Next":
                     value = next
                     break;
-                case "DecoratorFactory":
+                case DECORATOR_FACTORY:
                     value = factory(data, host)
                     break;
                     // return req.user
@@ -784,10 +797,22 @@ export class NestApplication {
                     break;
             }
 
+            const allPipes = [...pipes, ...paramPipes]
 
-            for (const pipe of [...pipes].filter(Boolean)) {
+            // console.log(value, 798, key, allPipes.length)
+
+            for (const pipe of allPipes.filter(Boolean)) {
                 const pipeInstance = this.getPipeInstance(pipe)
-                value = await pipeInstance.transform(value)
+                // console.log('++')
+                const type = key.toLowerCase() === DECORATOR_FACTORY ? "custom" : key.toLowerCase()
+                // 在这块给管道进行的传参数哈
+                value = await pipeInstance.transform(value, {
+                    type: type,
+                    // 提供参数的原类型是什么？
+                    // TypeScript 接口在转译期间消失。因此，如果方法参数的类型声明为接口而不是类，则 metatype 值将为 Object
+                    metatype: undefined,
+                    data: data
+                })
             }
 
             return value;

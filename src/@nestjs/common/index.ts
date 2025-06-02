@@ -20,3 +20,6 @@ export * from "./use-filters.decorator"
 
 export * from "./pipes"
 export * from "./pipe-transform.interface"
+export * from "./argument-metadata.interface"
+
+export * from "./use-pipes.decorator"

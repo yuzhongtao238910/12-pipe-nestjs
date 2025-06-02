@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from "@nestjs/common"
+import { Controller, Get, Query, Body, UsePipes, Post } from "@nestjs/common"
 
 
 
@@ -11,6 +11,9 @@ import { ParseArrayPipe } from "@nestjs/common"
 import { ParseUUIDPipe } from "@nestjs/common"
 import { ParseEnumPipe } from "@nestjs/common"
 import { DefaultValuePipe } from "@nestjs/common"
+import { CustomPipe } from "./self-pipe/custome.pipe"
+import { ZodValidation } from "./self-pipe/zod-validation.pipe"
+import { createCatSchema, CreateCatDto } from "./schema/create-cat.dto"
 
 enum Roles {
     Admin = "admin",
@@ -18,6 +21,7 @@ enum Roles {
 }
 
 @Controller('')
+// @UsePipes(new ZodValidation(createCatSchema))
 // 可以设置控制器级别的，只针对控制器级别的方法生效
 // @UseFilters( new CustomExceptionFilter() ) // 这个是控制器级别的，针对所有的生效
 // 如果有参数，就只能使用类了，或者是说需要依赖注入
@@ -93,4 +97,28 @@ export class AppController {
         // ParseUUIDPipe 判断传递过来的id是不是uuid
         return `${username} is a default-value`
     }
+
+
+    // 自定义管道
+    @Get("custom/:value")
+    getCustom(@Param("value", CustomPipe) value: string, age: number) {
+    // getCustom(@Param("value", new CustomPipe()) value: string) {
+        // ParseUUIDPipe 判断传递过来的id是不是uuid
+        return `${value} is a custom-pipe`
+    }
+
+
+    // UsePipes 可以写到方法上或者是控制器上也可以哈，因为对于一种的crud哈
+    @Post("cats-create")
+    @UsePipes(new ZodValidation(createCatSchema))
+    async createCat(@Body() createCatDto: CreateCatDto) {
+        console.log(createCatDto, 115)
+        return {
+            message: "success",
+            status: 200,
+            obj: createCatDto
+        }
+        // return "apple"
+    }
+
 }

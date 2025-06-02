@@ -1,4 +1,6 @@
+// import {  } from "@nestjs/core"
 import "reflect-metadata"
+import { DECORATOR_FACTORY } from "../core/constants"
 
 
 export const createParamDecorator = (keyOrFactory: String  | Function ) => {
@@ -19,7 +21,7 @@ export const createParamDecorator = (keyOrFactory: String  | Function ) => {
                 // 这里面就是自定义装饰器了
                 existingParameters[parameterIndex] = {
                     parameterIndex,
-                    key: "DecoratorFactory",
+                    key: DECORATOR_FACTORY,
                     factory: keyOrFactory,
                     data,
                     pipes

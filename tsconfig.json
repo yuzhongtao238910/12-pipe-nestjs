@@ -23,7 +23,7 @@
         "@nestjs/*": ["src/@nestjs/*"]
       }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "doc/**/*"],
     "exclude": ["node_modules", "dist"]
   }
   

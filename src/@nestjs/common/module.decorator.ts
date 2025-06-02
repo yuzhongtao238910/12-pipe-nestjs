@@ -89,7 +89,7 @@ export function defineModule( nestModule, targets = []) {
     // key：nestModule
     // value：nestModule是对应得模块
     targets.forEach(target => {
-        console.log(target, 89999)
+        // console.log(target, 89999)
         // console.log(target instanceof Function, "target")
         Reflect.defineMetadata("nestModule", nestModule, target)
     })

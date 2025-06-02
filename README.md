@@ -22,3 +22,58 @@ async findOne(@Param('id', ParseIntPipe) id: number) {
   return this.catsService.findOne(id);
 }
 ```
+
+- 基于架构的验证
+    - 我们尝试运行我们的服务之前确保post的body是有效的
+```typescript
+@Post()
+async create(@Body() createCatDto: CreateCatDto) {
+    this.catsService.create(createCatDto)
+}
+export class createCatDto {
+    name: string
+    age: number
+    bread: string
+}
+// 我们希望确保对 create 方法的任何传入请求都包含一个有效的 body。
+// 因此，我们必须验证 createCatDto 对象的三个成员。我们可以在路由处理程序方法中执行此操作，但这样做是不理想的，因为它会违反单一责任原则（SRP）。
+// 另一种方法可能是创建一个验证器类并将任务委托给它。这种方法的缺点是我们必须记住在每个方法的开头调用这个验证器。
+```
+    - 对象架构验证
+        - npm i zod
+        - zod 是一个声明式的模式验证库，可以帮我们验证数据结构
+    - 类验证器
+
+
+- 自定义管道
+    - 
+```typescript
+export class ValidationPipe implements PipeTransform {
+  transform(value: any, metadata: ArgumentMetadata) {
+    return value;
+  }
+}
+```
+- 每个管道必须实现 transform() 方法以履行 PipeTransform 接口合同。此方法有两个参数：value,metadata
+    - value 参数是当前处理的方法参数（在其被路由处理方法接收之前），metadata 是当前处理的方法参数的元数据。元数据对象具有以下属性：
+```typescript
+export interface ArgumentMetadata {
+    type: 'body' | 'query' | 'param' | 'custom';
+    metatype?: Type<unknown>;
+    data?: string;
+}
+```
+    - type: 指示参数是 body @Body()、query @Query()、param @Param() 还是自定义参数
+    - metatype: 提供参数的元类型，例如 String。注意：如果您在路由处理方法签名中省略类型声明，或使用原生 JavaScript，则该值为 undefined。
+    - data: 传递给装饰器的字符串，例如 @Body('string')。如果您将装饰器括号留空，则为 undefined。
+
+- metatype
+- 以及让pipe支持依赖注入
+- 验证的2种方式
+    - 对象架构验证
+        - 沟通过构建schema
+    - 类验证器
+        - 另一种验证技术，类验证器
+        - Nest 与 class-validator 库配合良好。这个强大的库允许您使用基于装饰器的验证。
+        - 基于装饰器的验证非常强大，特别是当它与 Nest 的管道功能结合使用时，因为我们可以访问处理属性的 metatype。在开始之前，我们需要安装所需的包：
+        - npm i --save class-validator class-transformer

@@ -7,7 +7,7 @@ export class ParseEnumPipe implements PipeTransform<string, string> {
     constructor(
         private readonly enumType: any
     ) {
-        console.log(enumType, 10)
+        // console.log(enumType, 10)
     }
 
     transform(value: string): string {
