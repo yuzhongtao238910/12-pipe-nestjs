@@ -16,6 +16,14 @@ export const createParamDecorator = (keyOrFactory: String  | Function ) => {
             //     key
             // })
 
+            // 这是修饰这个方法的哈
+            // propertyKey就是方法名字哈
+            // 从原型的方法属性获取到参数类型的数组
+            // 并且取索引对应的类型哈
+            const metatype = Reflect.getMetadata("design:paramtypes", target, propertyKey)[parameterIndex]
+
+            // console.log(metatype, "metatype")
+
             // 如果传递过来的是一个函数的话，会存放参数索引，key定死为装饰器工厂，
             if (keyOrFactory instanceof Function) {
                 // 这里面就是自定义装饰器了
@@ -24,7 +32,8 @@ export const createParamDecorator = (keyOrFactory: String  | Function ) => {
                     key: DECORATOR_FACTORY,
                     factory: keyOrFactory,
                     data,
-                    pipes
+                    pipes,
+                    metatype
                 }
 
 
@@ -34,7 +43,8 @@ export const createParamDecorator = (keyOrFactory: String  | Function ) => {
                     parameterIndex,
                     key: keyOrFactory,
                     data,
-                    pipes
+                    pipes,
+                    metatype
                 }
             }
 

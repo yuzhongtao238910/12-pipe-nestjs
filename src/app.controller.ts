@@ -15,6 +15,9 @@ import { CustomPipe } from "./self-pipe/custome.pipe"
 import { ZodValidation } from "./self-pipe/zod-validation.pipe"
 import { createCatSchema, CreateCatDto } from "./schema/create-cat.dto"
 
+import { CreateUserDto } from "./schema/create-user.dto"
+import { ClassValidationPipe } from "./self-pipe/class-validation.pipe"
+
 enum Roles {
     Admin = "admin",
     VIP = "vip"
@@ -120,5 +123,42 @@ export class AppController {
         }
         // return "apple"
     }
+
+
+    // ClassValidationPipe
+    // ClassValidationPipe
+    @Post("create/user")
+    @UsePipes(new ClassValidationPipe())
+    async createUser(@Body() createUserDto: CreateUserDto) {
+        console.log(createUserDto, 115)
+        return {
+            message: "success",
+            status: 200,
+            obj: createUserDto
+        }
+        // return "apple"
+    }
+
+    @Post("create/dog")
+    // @UsePipes(new ClassValidationPipe())
+    async createDogr(@Body() createUserDto: CreateUserDto) {
+        console.log(createUserDto, 115)
+        return {
+            message: "success",
+            status: 200,
+            obj: createUserDto
+        }
+        // return "apple"
+    }
+
+
+    @Post("create")
+    async create(
+        @Body(new ClassValidationPipe()) createUserDto: CreateUserDto,
+    ) {
+    //   this.catsService.create(createCatDto);
+        return "11"
+    }
+
 
 }

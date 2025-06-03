@@ -13,7 +13,7 @@
         - ParseIntPipe
         - ParseFloatPipe
         - ParseBoolPipe
-        - 
+        - ValidationPipe 这个也是内置的哈
 
 - 要使用管道，我们需要将管道类的实例绑定到适当的上下文中。
 ```typescript
@@ -77,3 +77,15 @@ export interface ArgumentMetadata {
         - Nest 与 class-validator 库配合良好。这个强大的库允许您使用基于装饰器的验证。
         - 基于装饰器的验证非常强大，特别是当它与 Nest 的管道功能结合使用时，因为我们可以访问处理属性的 metatype。在开始之前，我们需要安装所需的包：
         - npm i --save class-validator class-transformer
+
+- 全局范围的管道
+    - 由于 ValidationPipe 被创建为尽可能通用，我们可以通过将其设置为全局范围管道来充分利用其效用
+    - 从而将其应用于整个应用程序中的每个路由处理程序。
+```typescript
+async function bootstrap() {
+    const app = await NestFactory.create(AppModule);
+    app.useGlobalPipes(new ValidationPipe());
+    await app.listen(3000);
+}
+bootstrap();
+```

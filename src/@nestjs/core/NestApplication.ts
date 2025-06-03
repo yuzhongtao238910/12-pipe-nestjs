@@ -55,6 +55,10 @@ export class NestApplication {
         
     }
 
+    useGlobalPipes(...pipes: PipeTransform[]) {
+        
+    }
+
 
     useGlobalFilters(...filters: ExceptionFilter[]) {
 
@@ -753,7 +757,7 @@ export class NestApplication {
         
 
         return Promise.all(temp.map(async (item, index) => {
-            const {key, data, factory, pipes: paramPipes} = item
+            const {key, data, factory, pipes: paramPipes, metatype} = item
 
 
             let value;
@@ -810,7 +814,7 @@ export class NestApplication {
                     type: type,
                     // 提供参数的原类型是什么？
                     // TypeScript 接口在转译期间消失。因此，如果方法参数的类型声明为接口而不是类，则 metatype 值将为 Object
-                    metatype: undefined,
+                    metatype: metatype,
                     data: data
                 })
             }
