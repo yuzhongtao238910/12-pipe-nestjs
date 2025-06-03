@@ -115,7 +115,6 @@ export class AppController {
     @Post("cats-create")
     @UsePipes(new ZodValidation(createCatSchema))
     async createCat(@Body() createCatDto: CreateCatDto) {
-        console.log(createCatDto, 115)
         return {
             message: "success",
             status: 200,
@@ -130,7 +129,6 @@ export class AppController {
     @Post("create/user")
     @UsePipes(new ClassValidationPipe())
     async createUser(@Body() createUserDto: CreateUserDto) {
-        console.log(createUserDto, 115)
         return {
             message: "success",
             status: 200,
@@ -142,7 +140,6 @@ export class AppController {
     @Post("create/dog")
     // @UsePipes(new ClassValidationPipe())
     async createDogr(@Body() createUserDto: CreateUserDto) {
-        console.log(createUserDto, 115)
         return {
             message: "success",
             status: 200,
@@ -160,5 +157,10 @@ export class AppController {
         return "11"
     }
 
+
+    @Get("demo1/:id")
+    async demo1(@Param("id") id: string) {
+        return "1" + id
+    }
 
 }

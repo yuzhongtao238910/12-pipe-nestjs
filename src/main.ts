@@ -40,7 +40,7 @@ async function bootstrap() {
     // app.useGlobalFilters(new CustomExceptionFilter());
 
 
-    app.useGlobalPipes(new ValidationPipe());
+    // app.useGlobalPipes(new ValidationPipe());
 
     await app.listen(8080)
 }

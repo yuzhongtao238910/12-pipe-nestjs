@@ -5,7 +5,7 @@ import { NestMiddleware, RequestMethod, ArgumentsHost, ExceptionFilter } from "@
 
 import { INJECTED_TOKENS, DESGIN_PARAMTYPES } from "../common/constant"
 import { defineModule } from "../common/module.decorator"
-import { APP_FILTER, DECORATOR_FACTORY} from "./constants"
+import { APP_FILTER, DECORATOR_FACTORY, APP_PIPE} from "./constants"
 import { GlobalHttpExceptionFilter } from "../common/http-exception.filter"
 import { PipeTransform } from "@nestjs/common"
 export class NestApplication {
@@ -45,6 +45,10 @@ export class NestApplication {
 
     // 自定义的全局的异常过滤器
     private readonly globalHttpExceptionFilter = []
+
+
+    // 这里存放着全局管道
+    private readonly globalPipes: PipeTransform[] = []
     
 
 
@@ -56,7 +60,8 @@ export class NestApplication {
     }
 
     useGlobalPipes(...pipes: PipeTransform[]) {
-        
+        console.log(pipes, 63)
+        this.globalPipes.push(...pipes)
     }
 
 
@@ -658,7 +663,6 @@ export class NestApplication {
                                 res.setHeader(header.name, header.value)
                             })
 
-                            console.log(result, 657)
 
                             // 把返回值序列化发回给客户端
                             res.send(result)
@@ -801,7 +805,9 @@ export class NestApplication {
                     break;
             }
 
-            const allPipes = [...pipes, ...paramPipes]
+            // 全局的 -》 控制器的 -》 方法的
+
+            const allPipes = [...this.globalPipes, ...pipes, ...paramPipes]
 
             // console.log(value, 798, key, allPipes.length)
 
@@ -845,12 +851,25 @@ export class NestApplication {
         }
     }
 
+    async initGlobalPipes() {
+        const providers = Reflect.getMetadata("providers", this.module) ?? []
+    
+        for (const provider of providers) {
+            if (provider.provide && provider.provide === APP_PIPE) {
+                const providerInstance = this.getProviderByToken(APP_PIPE, this.module)
+
+                this.useGlobalPipes(providerInstance)
+            }
+        }
+    }
 
     async listen(port: number) {
         // 在这块支持异步
         await this.initProviders()
         await this.initMiddlewares()
         await this.initGlobalFilters(); // 初始化全局的过滤器，为了可以使全局的过滤器具有依赖注入的功能哈
+
+        await this.initGlobalPipes(); // 初始化全局的管道哈
         await this.initController(this.module)
         // 调用express实例的listen方法启动一个express的app服务器，监听port端口
         this.app.listen(port, () => {
